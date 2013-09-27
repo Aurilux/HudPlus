@@ -1,0 +1,82 @@
+<?xml version="1.0" ?> 
+<project name="HudPlus" default="build">
+	
+	<!-- Initializes files that contains values that we will use during the building process -->
+	<property file="general.properties" prefix="general"/>
+	<property file="exclusive.properties" prefix="exclusive"/>
+	<property file="private.properties" prefix="private"/>
+	
+	<!-- Cleans the mcp and src directories by deleting all of their contents -->
+	<target name="clean">
+		<delete file="${general.dir_mcp}/src/minecraft/mcmod.info" />
+		<delete file="${general.dir_mcp}/src/minecraft/pack.mcmeta" />
+		<delete dir="${general.dir_mcp}/src/minecraft/com/aurilux" />
+		<delete dir="${general.dir_mcp}/reobf/minecraft" />
+	</target>
+	
+	<!-- Increments the build number by one every time this script is run -->
+	<target name="increment_build_number">
+		<propertyfile file="exclusive.properties">
+			<entry key="build_number" type="int" operation="+" default="1"/>
+		</propertyfile>
+	</target>
+	
+	<!-- Copies the contents of the mods source directory to the mcp directory for compiling and obfuscation -->
+	<target name="prep">
+		<copy todir="${general.dir_mcp}/src/minecraft">
+			<fileset dir="${general.dir_source}/${exclusive.mod_name}/common/" />
+		</copy>
+	</target>
+	
+	<!-- Replaces certain pieces of text with selected values -->
+	<target name="replace_tokens">
+		<replace dir="${general.dir_mcp}/src/minecraft/com/aurilux" token="@MOD_ID@"       value="${exclusive.mod_id}" />
+		<replace dir="${general.dir_mcp}/src/minecraft/com/aurilux" token="@MOD_NAME@"     value="${exclusive.mod_name}" />
+		<replace dir="${general.dir_mcp}/src/minecraft/com/aurilux" token="@VERSION@"      value="${exclusive.mod_version}" />
+		<!-- <replace dir="${general.dir_mcp}/src/minecraft/com/aurilux" token="@FINGERPRINT@"  value="${private.fingerprint_signature}" /> -->
+		<replace dir="${general.dir_mcp}/src/minecraft/com/aurilux" token="@BUILD_NUMBER@" value="${exclusive.build_number}" />
+	</target>
+	
+	<!-- Recompiles Minecraft with our mod by executing the appropriate file (depends upon OS) -->
+	<target name="recompile">
+		<exec dir="${general.dir_mcp}" executable="cmd" osfamily="windows">
+			<arg line="/c recompile.bat" />
+		</exec>
+		<exec dir="${general.dir_mcp}" executable="bash" osfamily="unix">
+			<arg line="recompile.sh" />
+		</exec>
+	</target>
+	
+	<!-- Reobfuscates Minecraft with our mod by executing the appropriate file (depends upon OS)-->
+	<target name="reobfuscate">
+		<exec dir="${general.dir_mcp}" executable="cmd" osfamily="windows">
+			<arg line="/c reobfuscate_srg.bat" />
+		</exec>
+		<exec dir="${general.dir_mcp}" executable="bash" osfamily="unix">
+			<arg line="reobfuscate_srg.sh" />
+		</exec>
+	</target>
+	
+	<!-- For when I learn how to use this
+	<target name="sign_jar">
+		<signjar jar="${private.dir_release}/${exclusive.mod_name}/${exclusive.minecraft_version}/${exclusive.mod_name}-${exclusive.mod_version}_${exclusive.minecraft_version}.jar" keystore="${private.keystore_location}" alias="${private.keystore_user_alias}" storepass="${private.keystore_user_password}" />
+	</target>
+	-->
+	
+	<!-- Goes through the entire process of building the jar for our mod -->
+	<target name="build" depends="clean, increment_build_number, prep, replace_tokens, recompile, reobfuscate">
+		<!-- Build the jar -->
+		<property name="release_dest" location="${private.dir_release}/${exclusive.mod_name}/${exclusive.minecraft_version}"/>
+		<echo>"${release_dest}"</echo>
+		<mkdir dir="${release_dest}" />
+		<jar destfile="${release_dest}/${exclusive.mod_name}-${exclusive.mod_version}_${exclusive.minecraft_version}.jar">
+			<fileset dir="${general.dir_mcp}/src/minecraft/" includes="mcmod.info" />
+			<fileset dir="${general.dir_mcp}/src/minecraft/" includes="pack.mcmeta" />
+			<fileset dir="${general.dir_mcp}/reobf/minecraft" />
+			<fileset dir="${general.dir_source}/${exclusive.mod_name}/resources" excludes="**/xcf/**" />
+		</jar>
+		
+		<!-- Clean up the MCP source now that we are done -->
+		<antcall target="clean" />
+	</target>
+</project>
