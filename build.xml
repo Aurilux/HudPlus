@@ -31,7 +31,7 @@
 	<!-- Replaces certain pieces of text with selected values -->
 	<target name="replace_tokens">
 		<!-- Ensures that only the mod specific Ref file is searched -->
-		<replace dir="${general.dir_mcp}/src/minecraft/com/aurilux/" includes="**/*_Ref*" propertyFile="exclusive.properties">
+		<replace dir="${general.dir_mcp}/src/minecraft/" includes="com/aurilux/**/*_Ref*, mcmod.info" propertyFile="exclusive.properties">
 			<replacefilter token="@MOD_ID@"       value="mod_id" />
 			<replacefilter token="@MOD_NAME@"     value="mod_name" />
 			<replacefilter token="@MOD_VERSION@"  value="mod_version" />

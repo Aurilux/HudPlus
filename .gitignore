@@ -1,7 +1,7 @@
 # Unique files #
 ######################
-*.bat
 *.jar
+*.bat
 private.properties
 error.*
 Screenshots/
