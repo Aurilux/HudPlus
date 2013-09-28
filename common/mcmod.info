@@ -1,0 +1,20 @@
+[
+{
+	"modid": @MOD_ID@,
+	"name": @MOD_NAME@,
+	"description": "Expand your HUD!",
+	"version": @MOD_VERSION@,
+	"url": "",
+	"updateUrl": "",
+	"authorList": [
+		"Aurilux"
+	],
+	"credits": "by Aurilux",
+	"logoFile": "",
+	"screenshots": [
+	],
+	"parent": "",
+	"dependencies": [
+	]
+}
+]

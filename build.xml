@@ -2,9 +2,9 @@
 <project name="HudPlus" default="build">
 	
 	<!-- Initializes files that contains values that we will use during the building process -->
+	<property file="private.properties" prefix="private"/>
 	<property file="general.properties" prefix="general"/>
 	<property file="exclusive.properties" prefix="exclusive"/>
-	<property file="private.properties" prefix="private"/>
 	
 	<!-- Cleans the mcp and src directories by deleting all of their contents -->
 	<target name="clean">
@@ -30,11 +30,14 @@
 	
 	<!-- Replaces certain pieces of text with selected values -->
 	<target name="replace_tokens">
-		<replace dir="${general.dir_mcp}/src/minecraft/com/aurilux" token="@MOD_ID@"       value="${exclusive.mod_id}" />
-		<replace dir="${general.dir_mcp}/src/minecraft/com/aurilux" token="@MOD_NAME@"     value="${exclusive.mod_name}" />
-		<replace dir="${general.dir_mcp}/src/minecraft/com/aurilux" token="@VERSION@"      value="${exclusive.mod_version}" />
-		<!-- <replace dir="${general.dir_mcp}/src/minecraft/com/aurilux" token="@FINGERPRINT@"  value="${private.fingerprint_signature}" /> -->
-		<replace dir="${general.dir_mcp}/src/minecraft/com/aurilux" token="@BUILD_NUMBER@" value="${exclusive.build_number}" />
+		<!-- Ensures that only the mod specific Ref file is searched -->
+		<replace dir="${general.dir_mcp}/src/minecraft/com/aurilux/" includes="**/*_Ref*" propertyFile="exclusive.properties">
+			<replacefilter token="@MOD_ID@"       value="mod_id" />
+			<replacefilter token="@MOD_NAME@"     value="mod_name" />
+			<replacefilter token="@MOD_VERSION@"  value="mod_version" />
+			<replacefilter token="@BUILD_NUMBER@" value="build_number" />
+			<!-- replacefilter token="@FINGERPRINT@" value="${private.fingerprint_signature}" /> -->
+		</replace>
 	</target>
 	
 	<!-- Recompiles Minecraft with our mod by executing the appropriate file (depends upon OS) -->
@@ -70,10 +73,10 @@
 		<echo>"${release_dest}"</echo>
 		<mkdir dir="${release_dest}" />
 		<jar destfile="${release_dest}/${exclusive.mod_name}-${exclusive.mod_version}_${exclusive.minecraft_version}.jar">
-			<fileset dir="${general.dir_mcp}/src/minecraft/" includes="mcmod.info" />
-			<fileset dir="${general.dir_mcp}/src/minecraft/" includes="pack.mcmeta" />
+			<fileset dir="${general.dir_mcp}/src/minecraft/" includes="mcmod.info, pack.mcmeta" />
 			<fileset dir="${general.dir_mcp}/reobf/minecraft" />
-			<fileset dir="${general.dir_source}/${exclusive.mod_name}/resources" excludes="**/xcf/**" />
+			<!-- Some mods don't have resource files. Adding the 'erroronmissingdir' attribute prevents the build from failing if the directory doesn't exist -->
+			<fileset dir="${general.dir_source}/${exclusive.mod_name}/resources" excludes="**/xcf/**" erroronmissingdir="false"/>
 		</jar>
 		
 		<!-- Clean up the MCP source now that we are done -->

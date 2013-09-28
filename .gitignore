@@ -1,10 +1,9 @@
 # Unique files #
 ######################
 *.bat
-
 *.jar
-
 private.properties
+error.*
 Screenshots/
 
 # OS generated files #
