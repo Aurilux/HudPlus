@@ -28,6 +28,7 @@ import com.aurilux.hp.api.HudComponent;
 import com.aurilux.hp.api.HudRegistry;
 
 public class HPHud extends GuiIngameForge {
+	//TODO use reflection helper to get and set private values?
 	//PRIVATE VARIABLES
     private Profiler profiler;
     private ScaledResolution res;
